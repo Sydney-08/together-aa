@@ -4,7 +4,7 @@
   TripDatabase.all=()=>window.FirebaseService?.currentUser()?FirebaseService.reports():localStore.all();
   TripDatabase.remove=id=>window.FirebaseService?.currentUser()?FirebaseService.removeReport(id):localStore.remove(id);
   const localSave=saveState;
-  saveState=()=>{localSave();window.FirebaseService?.saveCurrent(getWorkspace())};
+  saveState=()=>{localSave();if(!suppressCloudSave)window.FirebaseService?.saveCurrent(getWorkspace())};
 
   const loginButton=$('loginButton'),userButton=$('userButton'),reminderButton=$('reminderButton');
   function showSignedOut(configured){loginButton.hidden=false;userButton.hidden=true;reminderButton.hidden=true;loginButton.textContent=configured?'使用 Google 登入':'設定 Firebase 後登入'}

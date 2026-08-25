@@ -1,18 +1,63 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+    // Data model:
+    // trips/{tripId}: ownerUid, memberUids, state, createdAt, updatedAt.
+    // users/{uid}/...: private legacy workspace, reports and reminder settings.
+    // tripInvites/{token}, mail/{id}: server-only documents containing Email PII.
+    function signedIn() { return request.auth != null; }
+    function owns(uid) { return signedIn() && request.auth.uid == uid; }
+    function isTripMember(data) { return signedIn() && data.memberUids is list && request.auth.uid in data.memberUids; }
+    function validTripState(data) {
+      return data is map
+        && data.keys().hasAll(['id','tripName','currentUserId','members','expenses'])
+        && data.keys().hasOnly(['id','tripName','startDate','endDate','currentUserId','members','expenses','transfers','createdAt','ownerUid','memberUids'])
+        && data.id is string && data.id.size() >= 8 && data.id.size() <= 80
+        && data.tripName is string && data.tripName.size() >= 1 && data.tripName.size() <= 60
+        && data.currentUserId is string && data.currentUserId.size() >= 1 && data.currentUserId.size() <= 80
+        && data.members is list && data.members.size() >= 1 && data.members.size() <= 50
+        && data.expenses is list && data.expenses.size() <= 2000
+        && (!('transfers' in data) || (data.transfers is list && data.transfers.size() <= 5000))
+        && (!('ownerUid' in data) || (data.ownerUid is string && data.ownerUid.size() <= 128))
+        && (!('memberUids' in data) || (data.memberUids is list && data.memberUids.size() <= 50));
     }
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      match /{document=**} {
-        allow read, write: if isOwner(userId);
-      }
+    function validTripDoc(data) {
+      return data.keys().hasAll(['ownerUid','memberUids','state','createdAt','updatedAt'])
+        && data.keys().hasOnly(['ownerUid','memberUids','state','createdAt','updatedAt'])
+        && data.ownerUid is string && data.ownerUid.size() >= 20 && data.ownerUid.size() <= 128
+        && data.memberUids is list && data.memberUids.size() >= 1 && data.memberUids.size() <= 50
+        && data.createdAt is timestamp && data.updatedAt is timestamp
+        && validTripState(data.state);
     }
-    // 只有 Admin SDK 與 Trigger Email 擴充套件可以處理寄信佇列。
-    match /mail/{mailId} {
-      allow read, write: if false;
+    function validReminder(data) {
+      return data.keys().hasAll(['enabled','email','weekday','time','timezone','uid','displayName','updatedAt'])
+        && data.keys().hasOnly(['enabled','email','weekday','time','timezone','uid','displayName','updatedAt','nextSendAt','lastSentDate','lastSentAt'])
+        && data.enabled is bool && data.email is string && data.email.size() <= 254
+        && data.weekday is int && data.weekday >= 0 && data.weekday <= 6
+        && data.time is string && data.time.size() == 5
+        && data.timezone is string && data.timezone.size() <= 80
+        && data.uid == request.auth.uid && data.displayName is string && data.displayName.size() <= 100;
     }
+
+    match /trips/{tripId} {
+      allow read: if isTripMember(resource.data);
+      allow create: if signedIn() && validTripDoc(request.resource.data)
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.memberUids.size() == 1
+        && request.resource.data.memberUids[0] == request.auth.uid;
+      allow update: if isTripMember(resource.data) && validTripDoc(request.resource.data)
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+    match /users/{uid}/app/current { allow read, create, update, delete: if owns(uid); }
+    match /users/{uid}/reports/{reportId} { allow read, create, update, delete: if owns(uid); }
+    match /users/{uid}/settings/reminder {
+      allow read, delete: if owns(uid);
+      allow create, update: if owns(uid) && validReminder(request.resource.data);
+    }
+    match /tripInvites/{token} { allow read, write: if false; }
+    match /mail/{mailId} { allow read, write: if false; }
   }
 }

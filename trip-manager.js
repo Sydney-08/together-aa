@@ -1,5 +1,5 @@
 const WORKSPACE_KEY='together-aa-workspace-v1';
-let workspace=loadWorkspace();
+let workspace=loadWorkspace(),suppressCloudSave=false;
 function createTrip(name,startDate='',endDate=''){return{id:crypto.randomUUID(),tripName:name,startDate,endDate,currentUserId:'owner',members:[{id:'owner',name:'你'}],expenses:[],createdAt:new Date().toISOString()}}
 function repairWorkspace(saved){const seen=new Set();saved.trips=saved.trips.filter(trip=>{if(!trip?.id||seen.has(trip.id))return false;seen.add(trip.id);return true});if(!saved.trips.some(trip=>trip.id===saved.activeTripId))saved.activeTripId=saved.trips[0]?.id;return saved}
 function loadWorkspace(){try{const saved=JSON.parse(localStorage.getItem(WORKSPACE_KEY));if(saved?.trips?.length)return repairWorkspace(saved)}catch{}const migrated={...structuredClone(state),id:crypto.randomUUID(),startDate:'2026-08-22',endDate:'2026-08-24',createdAt:new Date().toISOString()};return{version:1,activeTripId:migrated.id,trips:[migrated]}}
@@ -7,7 +7,7 @@ function activeTrip(){return workspace.trips.find(trip=>trip.id===workspace.acti
 function syncActive(){const index=workspace.trips.findIndex(trip=>trip.id===workspace.activeTripId);if(index>=0)workspace.trips[index]=structuredClone(state)}
 function saveWorkspace(){syncActive();localStorage.setItem(WORKSPACE_KEY,JSON.stringify(workspace))}
 function getWorkspace(){syncActive();return structuredClone(workspace)}
-function applyWorkspace(next){if(!next?.trips?.length)return false;workspace=next;workspace.activeTripId=workspace.activeTripId||workspace.trips[0].id;state=structuredClone(activeTrip());localStorage.setItem(WORKSPACE_KEY,JSON.stringify(workspace));render();renderDashboard();return true}
+function applyWorkspace(next){if(!next?.trips?.length)return false;suppressCloudSave=true;try{workspace=next;workspace.activeTripId=workspace.activeTripId||workspace.trips[0].id;state=structuredClone(activeTrip());localStorage.setItem(WORKSPACE_KEY,JSON.stringify(workspace));render();renderDashboard();return true}finally{suppressCloudSave=false}}
 const originalSaveState=saveState;saveState=()=>{originalSaveState();saveWorkspace()};
 state=structuredClone(activeTrip());
 function dateRange(trip){const format=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString('zh-TW',{month:'short',day:'numeric'}):'';return trip.startDate?`${format(trip.startDate)}${trip.endDate?` — ${format(trip.endDate)}`:''}`:'未設定日期'}

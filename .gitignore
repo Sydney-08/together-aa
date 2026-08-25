@@ -11,3 +11,4 @@ firebase-debug.log
 Thumbs.db
 .agents/
 skills-lock.json
+.firestore-security-analysis.md

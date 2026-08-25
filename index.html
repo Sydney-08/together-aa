@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="dashboard.css" />
   <link rel="stylesheet" href="settlement-feature.css" />
   <link rel="stylesheet" href="payment-feature.css" />
+  <link rel="stylesheet" href="collaboration-feature.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -125,6 +126,7 @@
     <form method="dialog" id="memberForm">
       <div class="dialog-heading"><div><p class="eyebrow">邀請夥伴</p><h2>新增成員</h2></div><button class="icon-button close-button" type="button" data-close="memberDialog" aria-label="關閉">×</button></div>
       <label>成員名稱<input id="memberName" required maxlength="12" placeholder="輸入暱稱" /></label>
+      <label>Google 帳號 Email<input id="memberEmail" type="email" placeholder="friend@gmail.com" /><small class="field-help">登入後填寫 Email 將寄出共同帳本邀請。</small></label>
       <div class="dialog-actions"><button class="secondary-button" type="button" data-close="memberDialog">取消</button><button class="primary-button" type="submit">加入旅程</button></div>
     </form>
   </dialog>
@@ -176,6 +178,10 @@
     <section class="account-wrap"><img id="accountPhoto" alt="Google 個人照片"><h2 id="accountName"></h2><p id="accountEmail"></p><div class="cloud-status"><span></span>資料已連結至雲端帳號</div><button class="secondary-button" id="logoutButton" type="button">登出 Google 帳號</button></section>
   </dialog>
 
+  <dialog id="inviteResultDialog">
+    <section class="invite-result"><div class="dialog-heading"><div><p class="eyebrow">INVITATION READY</p><h2>邀請已建立</h2></div><button class="icon-button close-button" type="button" data-close="inviteResultDialog">×</button></div><p>系統已建立邀請。寄信服務啟用前，也可以先把以下連結傳給對方：</p><input id="inviteResultUrl" readonly><button class="primary-button" id="copyInviteButton" type="button">複製邀請連結</button></section>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="firebase-config.js"></script>
   <script type="module" src="firebase-service.js"></script>
@@ -184,5 +190,6 @@
   <script src="settlement-feature.js"></script>
   <script src="trip-manager.js"></script>
   <script src="cloud-integration.js"></script>
+  <script src="collaboration-feature.js"></script>
 </body>
 </html>
