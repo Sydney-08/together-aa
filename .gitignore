@@ -1,7 +1,13 @@
 functions/node_modules/
+node_modules/
+together-aa/
+/package.json
+/package-lock.json
 .firebase/
 .firebaserc
 firebase-debug.log
 *-debug.log
 .DS_Store
 Thumbs.db
+.agents/
+skills-lock.json
