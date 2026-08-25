@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="auth.css" />
   <link rel="stylesheet" href="dashboard.css" />
   <link rel="stylesheet" href="settlement-feature.css" />
+  <link rel="stylesheet" href="payment-feature.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -125,6 +126,18 @@
       <div class="dialog-heading"><div><p class="eyebrow">邀請夥伴</p><h2>新增成員</h2></div><button class="icon-button close-button" type="button" data-close="memberDialog" aria-label="關閉">×</button></div>
       <label>成員名稱<input id="memberName" required maxlength="12" placeholder="輸入暱稱" /></label>
       <div class="dialog-actions"><button class="secondary-button" type="button" data-close="memberDialog">取消</button><button class="primary-button" type="submit">加入旅程</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="expensePaymentDialog">
+    <form id="expensePaymentForm">
+      <div class="dialog-heading"><div><p class="eyebrow">EXPENSE REPAYMENT</p><h2 id="expensePaymentTitle">單筆費用還款</h2></div><button class="icon-button close-button" type="button" data-close="expensePaymentDialog" aria-label="關閉">×</button></div>
+      <input id="paymentExpenseId" type="hidden">
+      <label>誰要還款？<select id="paymentDebtor" required></select></label>
+      <div class="payment-outstanding"><span>此人尚欠</span><strong id="paymentOutstanding">NT$ 0</strong></div>
+      <label>本次還款金額（NT$）<input id="paymentAmount" type="number" min="1" step="1" required placeholder="輸入實際收到的金額"></label>
+      <p class="form-note">每次還款都會留下獨立紀錄，不會修改原始花費。</p>
+      <div class="dialog-actions"><button class="secondary-button" id="fillOutstandingButton" type="button">填入全部欠款</button><button class="primary-button" type="submit">確認還款</button></div>
     </form>
   </dialog>
 
