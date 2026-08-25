@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7f5ef" />
+  <title>一起 AA｜旅行分帳</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="features.css" />
+  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" id="homeButton" aria-label="一起 AA 首頁">
+        <span class="brand-mark">AA</span>
+        <span>一起 AA</span>
+      </a>
+      <div class="top-actions">
+      <button class="history-button" id="reminderButton" type="button" hidden>提醒設定</button>
+      <button class="history-button" id="openHistoryButton" type="button">歷史報表</button>
+      <button class="google-button" id="loginButton" type="button">使用 Google 登入</button>
+      <button class="user-button" id="userButton" type="button" hidden><img id="userPhoto" alt=""><span id="userName"></span></button>
+      <button class="icon-button" id="resetButton" type="button" title="重設示範資料" aria-label="重設示範資料">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 1 1-2.35-5.65L20 7.7M20 3v5h-5"/></svg>
+      </button>
+      </div>
+    </header>
+
+    <main id="dashboardView" class="dashboard-view" hidden>
+      <section class="dashboard-hero"><div><p class="eyebrow">MY SHARED EXPENSES</p><h1>你的分帳空間</h1><p>旅行、聚餐或日常合租，每一段共同花費都有自己的帳本。</p></div><button class="primary-button" id="openTripButton" type="button"><span>＋</span> 建立新行程</button></section>
+      <section class="dashboard-summary"><article><span>進行中的帳本</span><strong id="tripTotalCount">0</strong></article><article><span>所有行程支出</span><strong id="allTripsAmount">NT$ 0</strong></article><article><span>已封存報表</span><strong>雲端保存</strong></article></section>
+      <section class="dashboard-section"><div class="section-heading"><div><p class="eyebrow">YOUR TRIPS</p><h2>我的行程與帳本</h2></div></div><div class="trip-card-grid" id="tripCardGrid"></div></section>
+      <section class="how-it-works"><div><p class="eyebrow">HOW IT WORKS</p><h2>三步完成共同分帳</h2></div><div class="guide-grid"><article><b>01</b><h3>建立行程</h3><p>為旅行、聚餐或租屋建立獨立帳本，加入同行成員。</p></article><article><b>02</b><h3>共同記帳</h3><p>指定付款人和分攤對象，每位成員的收付狀態即時計算。</p></article><article><b>03</b><h3>結算封存</h3><p>依建議完成還款，再把完整小報表保存到歷史紀錄。</p></article></div></section>
+    </main>
+
+    <main id="tripView">
+      <section class="trip-hero">
+        <div>
+          <button class="back-button" id="backToDashboard" type="button">← 所有行程</button>
+          <p class="eyebrow">目前旅程</p>
+          <div class="title-row">
+            <h1 id="tripName" contenteditable="true" spellcheck="false">台南週末小旅行</h1>
+            <span class="edit-hint">點擊改名</span>
+          </div>
+          <p class="trip-meta"><span id="tripDate">尚未設定日期</span><span class="dot"></span><span id="expenseCount">0 筆消費</span></p>
+        </div>
+        <button class="primary-button" id="openExpenseButton" type="button"><span>＋</span> 新增花費</button>
+      </section>
+
+      <section class="stats-grid" aria-label="旅程摘要">
+        <article class="stat-card total-card">
+          <p>旅程總花費</p>
+          <strong id="totalAmount">NT$ 0</strong>
+          <span>所有成員共同支出</span>
+          <div class="mini-bars" id="miniBars" aria-hidden="true"></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon coral">↗</div>
+          <p>你的代墊</p>
+          <strong id="myPaid">NT$ 0</strong>
+          <span id="myPaidHint">你目前沒有代墊</span>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon mint">◎</div>
+          <p>你的平均分攤</p>
+          <strong id="myShare">NT$ 0</strong>
+          <span id="myBalanceHint">已經結清</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <div class="ledger-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">共同帳本</p><h2>最近花費</h2></div>
+            <div class="filter-group" role="group" aria-label="支出篩選">
+              <button class="filter active" data-filter="all" type="button">全部</button>
+              <button class="filter" data-filter="mine" type="button">我支付的</button>
+            </div>
+          </div>
+          <div class="expense-list" id="expenseList"></div>
+          <div class="empty-state" id="emptyState" hidden>
+            <span>✦</span><h3>還沒有任何花費</h3><p>新增第一筆，一起旅行不傷感情。</p>
+          </div>
+        </div>
+
+        <aside class="sidebar">
+          <section class="side-card">
+            <div class="side-card-heading"><div><p class="eyebrow">同行夥伴</p><h2>成員</h2></div><button class="text-button" id="openMemberButton" type="button">＋ 加入</button></div>
+            <div class="member-list" id="memberList"></div>
+          </section>
+          <section class="side-card settlement-card">
+            <div class="side-card-heading"><div><p class="eyebrow">最佳還款方式</p><h2>結算建議</h2></div><span class="pill">自動計算</span></div>
+            <div id="settlementList" class="settlement-list"></div>
+            <button class="secondary-button" id="copySettlementButton" type="button">複製結算結果</button>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="expenseDialog">
+    <form method="dialog" id="expenseForm">
+      <div class="dialog-heading"><div><p class="eyebrow">共同記一筆</p><h2>新增花費</h2></div><button class="icon-button close-button" type="button" data-close="expenseDialog" aria-label="關閉">×</button></div>
+      <label>花費項目<input id="expenseTitle" name="title" required maxlength="30" placeholder="例如：晚餐、車票、住宿" /></label>
+      <div class="form-row">
+        <label>金額（NT$）<input id="expenseAmount" name="amount" required min="1" step="1" type="number" inputmode="numeric" placeholder="0" /></label>
+        <label>誰先付款<select id="expensePayer" name="payer" required></select></label>
+      </div>
+      <label>分類<select id="expenseCategory" name="category"><option value="food">餐飲</option><option value="transport">交通</option><option value="stay">住宿</option><option value="ticket">門票</option><option value="other">其他</option></select></label>
+      <fieldset><legend>哪些人要分攤？</legend><div class="participant-grid" id="participantGrid"></div></fieldset>
+      <p class="form-note">目前採平均分攤；未勾選的成員不會計入這筆。</p>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-close="expenseDialog">取消</button><button class="primary-button" type="submit">加入共同帳本</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="memberDialog">
+    <form method="dialog" id="memberForm">
+      <div class="dialog-heading"><div><p class="eyebrow">邀請夥伴</p><h2>新增成員</h2></div><button class="icon-button close-button" type="button" data-close="memberDialog" aria-label="關閉">×</button></div>
+      <label>成員名稱<input id="memberName" required maxlength="12" placeholder="輸入暱稱" /></label>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-close="memberDialog">取消</button><button class="primary-button" type="submit">加入旅程</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="tripDialog">
+    <form id="tripForm">
+      <div class="dialog-heading"><div><p class="eyebrow">NEW SHARED BOOK</p><h2>建立新行程</h2></div><button class="icon-button close-button" type="button" data-close="tripDialog" aria-label="關閉">×</button></div>
+      <label>行程或帳本名稱<input id="newTripName" required maxlength="30" placeholder="例如：花蓮三日遊、八月室友帳單"></label>
+      <div class="form-row"><label>開始日期<input id="newTripStart" type="date"></label><label>結束日期<input id="newTripEnd" type="date"></label></div>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-close="tripDialog">取消</button><button class="primary-button" type="submit">建立帳本</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="historyDialog" class="history-dialog">
+    <section class="history-wrap">
+      <div class="dialog-heading"><div><p class="eyebrow">資料庫紀錄</p><h2>過往花費小報表</h2></div><button class="icon-button close-button" type="button" data-close="historyDialog" aria-label="關閉">×</button></div>
+      <div class="history-actions">
+        <p>將目前旅程封存成一份快照，之後仍可回來查看。</p>
+        <button class="primary-button" id="archiveTripButton" type="button">封存目前旅程</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+  </dialog>
+
+  <dialog id="reminderDialog">
+    <form id="reminderForm">
+      <div class="dialog-heading"><div><p class="eyebrow">EMAIL REMINDER</p><h2>每週帳務提醒</h2></div><button class="icon-button close-button" type="button" data-close="reminderDialog" aria-label="關閉">×</button></div>
+      <label class="switch-row"><span><strong>啟用 Email 提醒</strong><small>寄送目前旅程的花費與待結算摘要</small></span><input id="reminderEnabled" type="checkbox"></label>
+      <label>收件信箱<input id="reminderEmail" type="email" required></label>
+      <div class="form-row"><label>每週星期<select id="reminderWeekday"><option value="1">星期一</option><option value="2">星期二</option><option value="3">星期三</option><option value="4">星期四</option><option value="5">星期五</option><option value="6">星期六</option><option value="0">星期日</option></select></label><label>寄送時間<input id="reminderTime" type="time" value="20:00" required></label></div>
+      <p class="form-note">時區會依目前裝置設定為 <span id="reminderTimezone"></span>。</p>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-close="reminderDialog">取消</button><button class="primary-button" type="submit">儲存提醒</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="accountDialog">
+    <section class="account-wrap"><img id="accountPhoto" alt="Google 個人照片"><h2 id="accountName"></h2><p id="accountEmail"></p><div class="cloud-status"><span></span>資料已連結至雲端帳號</div><button class="secondary-button" id="logoutButton" type="button">登出 Google 帳號</button></section>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="firebase-service.js"></script>
+  <script src="database.js"></script>
+  <script src="app.js"></script>
+  <script src="trip-manager.js"></script>
+  <script src="cloud-integration.js"></script>
+</body>
+</html>
