@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="settlement-feature.css" />
   <link rel="stylesheet" href="payment-feature.css" />
   <link rel="stylesheet" href="collaboration-feature.css" />
+  <link rel="stylesheet" href="home-balance-feature.css?v=20260928-1" />
 </head>
 <body>
   <div class="app-shell">
@@ -37,6 +38,12 @@
     <main id="dashboardView" class="dashboard-view" hidden>
       <section class="dashboard-hero"><div><p class="eyebrow">MY SHARED EXPENSES</p><h1>你的分帳空間</h1><p>旅行、聚餐或日常合租，每一段共同花費都有自己的帳本。</p></div><button class="primary-button" id="openTripButton" type="button"><span>＋</span> 建立新行程</button></section>
       <section class="dashboard-summary"><article><span>進行中的帳本</span><strong id="tripTotalCount">0</strong></article><article><span>所有行程支出</span><strong id="allTripsAmount">NT$ 0</strong></article><article><span>已封存報表</span><strong>雲端保存</strong></article></section>
+      <section class="home-balance-panel" id="homeBalancePanel">
+        <div class="home-balance-heading"><div><p class="eyebrow">MY BALANCE</p><h2>我的待結清提醒</h2></div><p>彙整所有帳本，並扣除已確認的完整或部分還款。</p></div>
+        <div class="home-balance-totals"><article class="home-balance-total owe"><span>我欠別人</span><strong id="homeOweAmount">NT$ 0</strong><em id="homeOweRatio">0%</em></article><article class="home-balance-total owed"><span>別人欠我</span><strong id="homeOwedAmount">NT$ 0</strong><em id="homeOwedRatio">0%</em></article></div>
+        <div class="home-balance-bar" aria-label="待結清比例"><i class="owe" id="homeBalanceBarOwe"></i><i class="owed" id="homeBalanceBarOwed"></i></div>
+        <ul class="home-balance-notice" id="homeBalanceNotice"></ul>
+      </section>
       <section class="dashboard-section"><div class="section-heading"><div><p class="eyebrow">YOUR TRIPS</p><h2>我的行程與帳本</h2></div></div><div class="trip-card-grid" id="tripCardGrid"></div></section>
       <section class="how-it-works"><div><p class="eyebrow">HOW IT WORKS</p><h2>三步完成共同分帳</h2></div><div class="guide-grid"><article><b>01</b><h3>建立行程</h3><p>為旅行、聚餐或租屋建立獨立帳本，加入同行成員。</p></article><article><b>02</b><h3>共同記帳</h3><p>指定付款人和分攤對象，每位成員的收付狀態即時計算。</p></article><article><b>03</b><h3>結算封存</h3><p>依建議完成還款，再把完整小報表保存到歷史紀錄。</p></article></div></section>
     </main>
@@ -178,6 +185,16 @@
     <section class="account-wrap"><img id="accountPhoto" alt="Google 個人照片"><h2 id="accountName"></h2><p id="accountEmail"></p><div class="cloud-status"><span></span>資料已連結至雲端帳號</div><button class="secondary-button" id="logoutButton" type="button">登出 Google 帳號</button></section>
   </dialog>
 
+  <dialog id="memberGmailDialog">
+    <form id="memberGmailForm" class="member-gmail-form">
+      <div class="dialog-heading"><div><p class="eyebrow">GOOGLE MEMBER</p><h2>設定成員 Gmail</h2></div><button class="icon-button close-button" type="button" data-close="memberGmailDialog" aria-label="關閉">×</button></div>
+      <p class="member-target">要綁定的成員：<strong id="existingMemberLabel"></strong></p>
+      <input id="existingMemberId" type="hidden"><input id="existingMemberName" type="hidden">
+      <label>Google 帳號 Email<input id="existingMemberEmail" type="email" required placeholder="friend@gmail.com"><small class="field-help">對方必須使用這個 Google 帳號接受邀請。</small></label>
+      <div class="dialog-actions"><button class="secondary-button" type="button" data-close="memberGmailDialog">取消</button><button class="primary-button" type="submit">寄出綁定邀請</button></div>
+    </form>
+  </dialog>
+
   <dialog id="inviteResultDialog">
     <section class="invite-result"><div class="dialog-heading"><div><p class="eyebrow">INVITATION READY</p><h2>邀請已建立</h2></div><button class="icon-button close-button" type="button" data-close="inviteResultDialog">×</button></div><p>系統已建立邀請。寄信服務啟用前，也可以先把以下連結傳給對方：</p><input id="inviteResultUrl" readonly><button class="primary-button" id="copyInviteButton" type="button">複製邀請連結</button></section>
   </dialog>
@@ -191,5 +208,6 @@
   <script src="trip-manager.js"></script>
   <script src="cloud-integration.js"></script>
   <script src="collaboration-feature.js"></script>
+  <script src="home-balance-feature.js?v=20260928-1"></script>
 </body>
 </html>
