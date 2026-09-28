@@ -65,6 +65,7 @@ window.FirebaseService={
   },
   async deleteTrip(id){requireUser();await deleteDoc(doc(db,'trips',id));knownTripIds.delete(id)},
   async inviteMember(tripId,name,email,memberId=null){requireUser();return(await httpsCallable(functions,'inviteTripMember')({tripId,name,email,...(memberId?{memberId}:{})})).data},
+  async sendSettlementReminder(tripId,fromMemberId,toMemberId){requireUser();return(await httpsCallable(functions,'sendSettlementReminder')({tripId,fromMemberId,toMemberId})).data},
   async acceptInvite(token){requireUser();return(await httpsCallable(functions,'acceptTripInvite')({token})).data},
   async saveReport(report){requireUser();await setDoc(doc(db,'users',user.uid,'reports',report.id),report)},
   async reports(){requireUser();const snap=await getDocs(collection(db,'users',user.uid,'reports'));return snap.docs.map(x=>x.data()).sort((a,b)=>new Date(b.archivedAt)-new Date(a.archivedAt))},

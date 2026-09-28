@@ -3,9 +3,22 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      ".firebaserc",
       "firestore.rules",
       "firestore.indexes.json",
       "functions/**",
+      "password.txt",
+      "**/password.txt",
+      ".git/**",
+      ".github/**",
+      ".agents/**",
+      ".codex/**",
+      ".firebase/**",
+      "together-aa/**",
+      "package.json",
+      "package-lock.json",
+      "skills-lock.json",
+      "README.md",
       "**/.*",
       "**/node_modules/**"
     ]

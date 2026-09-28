@@ -21,7 +21,7 @@
 
   renderSettlements=balance=>{
     const list=settlements(balance);
-    $('settlementList').innerHTML=list.length?list.map(item=>`<div class="settlement settlement-action"><span>${escapeHtml(member(item.from)?.name||'已離開')}</span><span class="arrow">→</span><span>${escapeHtml(member(item.to)?.name||'已離開')}</span><strong>${money(item.amount)}</strong><button type="button" data-confirm-settlement data-from="${item.from}" data-to="${item.to}" data-amount="${item.amount}">確認結清</button></div>`).join(''):'<div class="all-settled">大家都結清了，漂亮！</div>';
+    $('settlementList').innerHTML=list.length?list.map(item=>`<div class="settlement settlement-action"><span>${escapeHtml(member(item.from)?.name||'已離開')}</span><span class="arrow">→</span><span>${escapeHtml(member(item.to)?.name||'已離開')}</span><strong>${money(item.amount)}</strong><button class="settlement-remind-button" type="button" data-remind-settlement data-from="${item.from}" data-to="${item.to}">提醒還款</button><button type="button" data-confirm-settlement data-from="${item.from}" data-to="${item.to}" data-amount="${item.amount}">確認結清</button></div>`).join(''):'<div class="all-settled">大家都結清了，漂亮！</div>';
     const confirmed=[...(state.transfers||[])].reverse();
     $('confirmedSettlementList').innerHTML=confirmed.length?`<p class="confirmed-title">已確認還款</p>${confirmed.map(item=>{const expense=state.expenses.find(e=>e.id===item.expenseId);return `<div class="confirmed-item"><span>✓ ${escapeHtml(member(item.from)?.name||item.from)} 已付給 ${escapeHtml(member(item.to)?.name||item.to)}${expense?`<small>${escapeHtml(expense.title)}</small>`:'<small>總帳還款</small>'}</span><strong>${money(item.amount)}</strong><button type="button" data-undo-settlement="${item.id}">撤銷</button></div>`}).join('')}`:'';
     $('copySettlementButton').disabled=!list.length;
@@ -41,7 +41,18 @@
   const baseDeleteMember=deleteMember;
   deleteMember=id=>{baseDeleteMember(id);if(!member(id)){state.transfers=(state.transfers||[]).filter(item=>item.from!==id&&item.to!==id);render()}};
 
-  $('settlementList').onclick=e=>{
+  $('settlementList').onclick=async e=>{
+    const reminder=e.target.closest('[data-remind-settlement]');
+    if(reminder){
+      const from=member(reminder.dataset.from),to=member(reminder.dataset.to);
+      if(!window.FirebaseService?.currentUser()){showToast('請先登入 Google 帳號');return}
+      if(!from?.linkedUid||!to?.linkedUid){showToast('欠款雙方都需要先設定並接受 Gmail 邀請');return}
+      reminder.disabled=true;const originalText=reminder.textContent;reminder.textContent='寄送中…';
+      try{await FirebaseService.syncNow(getWorkspace());await FirebaseService.sendSettlementReminder(state.id,from.id,to.id);showToast(`已同時提醒 ${from.name} 與 ${to.name}`)}
+      catch(error){showToast(error.message?.replace('FirebaseError: ','')||'提醒寄送失敗')}
+      finally{reminder.disabled=false;reminder.textContent=originalText}
+      return;
+    }
     const button=e.target.closest('[data-confirm-settlement]');
     if(!button)return;
     const from=member(button.dataset.from),to=member(button.dataset.to),amount=Number(button.dataset.amount);
