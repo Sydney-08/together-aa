@@ -13,6 +13,17 @@ function localParts(date,timeZone){
 function money(value){return `NT$ ${Math.round(value||0).toLocaleString('zh-TW')}`}
 function cleanEmail(value){return String(value||'').trim().toLowerCase()}
 
+exports.listMyTrips=onCall({region:'asia-east1'},async request=>{
+  if(!request.auth)throw new HttpsError('unauthenticated','請先使用 Google 帳號登入');
+  const snapshot=await getFirestore().collection('trips').where('memberUids','array-contains',request.auth.uid).get();
+  const trips=snapshot.docs.map(item=>{
+    const state=structuredClone(item.data().state||{});
+    for(const member of state.members||[])delete member.email;
+    return state;
+  });
+  return{trips};
+});
+
 exports.inviteTripMember=onCall({region:'asia-east1'},async request=>{
   if(!request.auth)throw new HttpsError('unauthenticated','請先使用 Google 帳號登入');
   const {tripId,name}=request.data||{},email=cleanEmail(request.data?.email);
